@@ -1,6 +1,6 @@
 pacman::p_load(xml2, rvest, dplyr, jsonlite)
 
-
+# devtools::install_github("leeper/rio")
 asc <- function(xx) as.character(xx)
 
 
@@ -13,89 +13,129 @@ test_for_div <- function(tree) {
   }
 }
 
-classes <-c("entry-content", "post-content", "post")
+vec_url <- c("http://data-steve.github.io/need-user-feedback-send-programmatically/"
+             , "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/"
+             , "https://brendanrocks.com/htmlwidgets-knitr-jekyll/"
+             , "http://www.bytemining.com/2016/02/its-been-a-while/"
+             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/"
+             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html"
+             , "http://citizen-statistician.org/2016/02/02/how-do-readers-perceive-the-results-of-a-data-analysis/"
+             , "http://civilstat.com/2016/04/after-5th-semester-of-statistics-phd-program/")
+
+
 
 
 url_num <-grep("blogspot",vec_url)
 
+check_for_gist <- function(xml_scrape){
+  scrpts <- xml2::xml_attrs(rvest::xml_nodes(xml_scrape, "script"), "src")
+  if (any(grepl("gist.github", scrpts))) {
+    gsub(".js", "", scrpts[grepl("gist.github", scrpts)])
+  } else {
+    NULL
+  }
+}
+
+download_gist <- function(gist_url){
+  gist_page <- xml2::read_html(gist_url)
+
+  gist_redirect <- paste0("https://gist.githubusercontent.com",
+                          xml2::xml_attr(
+                            xml2::xml_find_first(
+                              xml2::xml_find_first(gist_page, xpath=".//div[contains(@class, 'file-actions')]")
+                              ,"a") ,"href"))
+
+  if (grepl("r|py",tolower(tools::file_ext(gist_redirect)))) {
+    filename = file.path(tempdir(),"gist_content")
+    curl::curl_download(gist_redirect,
+                        destfile = filename)
+    gist_content <- suppressWarnings(readLines(gist_redirect))
+  } else {
+    gist_content <- NULL
+  }
+  list("gist_content"=gist_content,file_type=tolower(tools::file_ext(gist_redirect)))
+}
+
+get_gist <-function(gist_urls){
+  if (length(gist_urls)==1){
+    download_gist(gist_urls)
+  } else {
+    invisible(lapply(gist_urls, download_gist))
+  }
+}
+
 url2Rmd <- function(url) {
-  xx    <- xml2::read_html(vec_url[url_num])
-  title <- xml2::xml_text(rvest::xml_node(xx,"title"))
+  xx    <- xml2::read_html(url)
+  title <- xml2::xml_text(rvest::xml_nodes(xx,"title"))
+  generator <- get_generator(xx)
   # xml2::xml_attr(rvest::xml_nodes(xx,"meta"), "generator")
-  test <- rvest::xml_nodes(xx,"body")
+  # test <- rvest::xml_nodes(xx,"body")
 
   # xml2::xml_parent(rvest::xml_nodes(rvest::xml_nodes(xx,"body"), "p"))
   # asc(xml_find_all(test,"//div/p"))
   # xml2::xml_parent()
+
+  classes <-c("entry-content", "post-content", "post", "post-bodycody")
   content_post <-names(which.max(sapply(classes,function(z) regexpr(z,asc(xx)))))
-  xml_find_first(xx,xpath=".//div[contains(@class, 'entry-content')]")
-  xml_nodes(xx,xpath="*[contains(@class, 'gist-meta')]")
-  body  <- xml_parent(xml_parent(xml_nodes(xx, paste("div",content_post,sep="."))))
-  xml_find_first(xx, xpath="*[contains(@id,'gist')]")
-  # walk up tree till hit a div tag
-  # while (!isTRUE(test_for_div(test))) {
-  #   test <- xml2::xml_parent(rvest::xml_nodes(test, test_for_div(test)))
-  # }
-  # keep only divs for entry or post class (no comments)
+  bdy <- xml_find_first(xx,xpath=paste0(".//div[contains(@class, ",shQuote(content_post),")]"))
 
-  #gist
-  xml_attr(xml_nodes(xml_find_first(xx,xpath=".//div[contains(@class, 'entry-content')]"),"script"),"src")
-  "https://gist.github.com/christophergandrud/00e7451c16439421b24a.js"
-  xml_attr(xml_nodes(xml_find_first(xx,xpath=".//div[contains(@class, 'file-actions')]"),"a"),"href")
-  /christophergandrud/00e7451c16439421b24a/raw/3d114fefa4845060fb015e7644b839beddb03701/topicmodels_json_ldavis.R
-  https://gist.githubusercontent.com/
-
-
-
-  xml2::xml_contents(body)
-  if (grepl("<pre>", asc(body))){
-
+  if (length(bdy)==0){
+    bdy <- xml_find_first(xx,xpath=".//article")
   }
-  if (grepl('gist-file', asc(body))
-  v1 <- xml2::xml_text(body[grepl("<pre>", asc(body))])
-  if (any(grepl("(\\d\n)+", v1))) {
-    v1[grepl("(\\d+\n)+", v1)] <- gsub("^.+?(\\d+\n)+(\\s+|\n+)*", "", v1[grepl("(\\d+\n)+", v1)])
+
+ browser()
+  # find and clean code chunks
+  if (grepl("<pre>", asc(bdy))){
+      v1 <- xml2::xml_text(bdy[grepl("<pre>", asc(bdy))])
+      if (any(grepl("(\\d\n)+", v1))) {
+        v1[grepl("(\\d+\n)+", v1)] <- gsub("^.+?(\\d+\n)+(\\s+|\n+)*", "", v1[grepl("(\\d+\n)+", v1)])
+      }
+      # xml2::(v1)
+      # xml2::read_xml(asc(lapply(v1, htmltools::code)[[1]]))
+      # body[grepl("<pre>", asc(body))]  <- )
   }
-  xml2::(v1)
-  xml2::read_xml(asc(lapply(v1, htmltools::code)[[1]]))
-  body[grepl("<pre>", asc(body))]  <- )
 
-  # rvest::xml_nodes(bd,"div.entry-content")
+  # check for and get gists
+  gist_urls <- check_for_gist(bdy)
+  if (!is.null(gist_urls)){
+    gist_list <- get_gist(gist_urls)
+    script_tag <-xml_child(bdy,"script")
+    codechunk <- read_xml(paste0(
+                    htmltools::div(
+                      htmltools::pre(class=gist_list[["file_type"]]
+                               , htmltools::code(
+                                 shQuote(paste(gsub("#'","#"
+                                          ,gist_list[["gist_content"]]),collapse="\n")))
+                                     )) ))
+    if (grepl("\\$",codechunk)) {
+      codechunk <-  gsub("\\$","$", codechunk)
+    }
+    if (grepl("<code>\"",codechunk)) {
+      codechunk <- gsub("</code>\"", "</code>", gsub("<code>\"","<code>", codechunk))
+    }
+    invisible(xml_replace(script_tag, codechunk))
+  }
 
-  # generator <- get_generator(xx)
-  # get_body(xx)
+  # div.my_syntax_box  -> <td class="code">
+  #   div.crayon-plain-wrap
 
+  md <- system(sprintf("echo %s | pandoc -r html  -t markdown", shQuote(asc(bdy)))
+               , intern = TRUE, ignore.stderr = TRUE)
 
+  hotbod <- gsub("```[ ]{0,1}\\{.*?\\}","```\\{r\\}",md[!grepl("<div|</div>|^\\\\",md)])
+  yml <- paste('---'
+               , 'title: "R Notebook"'
+               , 'output: html_notebook'
+               , '---'
+               , '\n\n', sep="\n")
+  filename <- paste0(paste(strsplit(tolower(title),"\\s+")[[1]],collapse="-"),".Rmd")
+  place <- file.path(tempdir(),filename)
+  writeLines(c(yml,paste0("# ", title), hotbod)  ,  place)
+  file.edit(place)
 }
 
 
 
-
-url2Rmd <- function(url) {
-  xx   <- xml2::read_html(url)
-  title <- xml2::xml_text(rvest::xml_node(xx,"title"))
-  generator <- get_generator(xx)
-  get_body(xx)
-
-}
-find/clean body content
-find/clean code chunks
-
-
-body_html <- shiny::tags$body(body)
-md <- system(sprintf("echo %s | pandoc -r html  -t markdown", shQuote(body_html))
-             , intern = TRUE, ignore.stderr = TRUE)
-body <- gsub("```[ ]{0,1}\\{.*?\\}","```\\{r\\}",md[!grepl("<div|</div>|^\\\\",md)])
-yml <- paste('---'
-             , 'title: "R Notebook"'
-             , 'output: html_notebook'
-             , '---'
-             , '\n\n', sep="\n")
-filename <- paste0(paste(strsplit(tolower(title),"\\s+")[[1]],collapse="-"),".Rmd")
-place <- file.path(tempdir(),filename)
-writeLines(c(yml,paste0("# ", title), body)  ,  place)
-file.edit(place)
-}
 
 get_generator <- function(xx){
   x <- as.character(xx)
@@ -107,17 +147,6 @@ get_generator <- function(xx){
     "jekyll"
   }
 }
-
-get_body <- function(xx) {
-  bd <- rvest::xml_nodes(xml2::read_html(xx),"body")
-  if (grepl('entry-content',bd)) {
-    rvest::xml_nodes(bd,"div.entry-content")
-  } else {
-    rvest::xml_nodes(bd,"div.post")
-  }
-}
-
-x5<-get_body(x5)
 
 get_code <- function(xx){
   browser()
@@ -141,13 +170,6 @@ code_converter <- function(ll){
   }
 }
 
-get_code(x4)
-
-
-
-
-
-
 read_text <- function(url,flnm){
   d<-get_body(url)
   place <- file.path(tempdir(),paste0(flnm,".md"))
@@ -155,70 +177,7 @@ read_text <- function(url,flnm){
   file.edit(place)
 }
 
-read_text(u3,"x3")
 
-
-
-grep('class="code"',as.character(x2))
-grep('class="code"',x2)
-
-
-locs <- grepl(".my_syntax_box",divs)
-if (any(locs)) {
-  to_cl <- writeLines(as.character(divs[locs][5]),"~/Desktop/test44.md")
-  as.character(to_cl)
-} else {
-  divs
-}
-
-}
-}
-
-
-
-
-#####
-
-urm <- function(urls){
-  rvest::xml_node(xml2::read_html(urls),"body")
-}
-
-u1 <- "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/"
-x1   <- urm(u1)
-
-u2 <- "http://data-steve.github.io/making-ggdumbbell-smarter/"
-x2   <- urm(u2)
-
-u3 <- "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/"
-x3   <- urm(u3)
-
-u4 <- "http://www.bytemining.com/2016/02/its-been-a-while/"
-x4   <- urm(u4)
-
-x5 <- "http://rogiersbart.blogspot.com/2016/04/a-workflow-for-publishing-rstudio.html"
-
-http://brendanrocks.com/htmlwidgets-knitr-jekyll/
-
-  as.character(xml2::read_html("http://brendanrocks.com/htmlwidgets-knitr-jekyll/"))
-
-
-# strsplit(tolower(xml2::xml_text(rvest::xml_node(xx,"title"))),"\\s+")[[1]][1]
-# divs <- rvest::xml_nodes(rvest::xml_node(xx,"body"),"div.post")
-# writeLines(x,"~/Desktop/test45.md")
-# file.edit("~/Desktop/test45.md")
-
-# http://rogiersbart.blogspot.com/2016/04/a-workflow-for-publishing-rstudio.html
-
-url2Rmd(urlz)
-
-
-
-div.my_syntax_box  -> <td class="code">
-  div.crayon-plain-wrap
-
-
-writeLines(as.character(x3),"~/Desktop/test43.md")
-file.edit("~/Desktop/test43.md")
 
 
 
@@ -233,87 +192,4 @@ load_checker <- function(md){
     return(the_l)
   }
 }
-loader <- load_checker(test2)
 
-find_
-
-
-vec_url <- c("http://data-steve.github.io/need-user-feedback-send-programmatically/"
-             , "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/"
-             , "https://brendanrocks.com/htmlwidgets-knitr-jekyll/"
-             , "http://www.bytemining.com/2016/02/its-been-a-while/"
-             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/"
-             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html"
-             , "http://citizen-statistician.org/2016/02/02/how-do-readers-perceive-the-results-of-a-data-analysis/"
-             , "http://civilstat.com/2016/04/after-5th-semester-of-statistics-phd-program/")
-
-test2 <-url2md("http://data-steve.github.io/need-user-feedback-send-programmatically/")
-
-grep("```",test2)
-
-zz <-
-
-
-
-
-
-
-
-  src    <- strsplit(paste(zz,collapse="\n"),"```")[[1]]
-src2 <- lapply(src, function(x) paste0(strsplit(x, "\n")[[1]],"\n"))
-cell_type <- ifelse(as.logical(rep(c(0,1),length(src))[1:length(src)]), "code","markdown")
-
-contents <- data.frame(cell_type = cell_type, stringsAsFactors = F)
-contents$source <- c(NA,NA,NA)
-contents$outputs <- "[]"
-
-contents$source <- unlist(lapply(1:length(contents$cell_type), function(i) {
-  paste(shQuote(src2[[i]]),collapse = ",")
-}))
-
-
-paste(toJSON(conte))
-
-jptr <- list()
-jptr$cells <- toJSON(contents)
-jptr$metadata <- jj
-list()
-jsonlite::validate(jsonlite::toJSON(contents))
-writeLines(jsonlite::prettify(jsonlite::toJSON(contents)),"~/Desktop/test2.ipynb")
-
-
-jj <- fromJSON(readLines(cl::go(home, "data/jupyter-metadata.txt")))
-
-cells <- toJSON(contents)
-
-test <-list(toJSON(contents),toJSON(jj))
-
-prettify(test)
-
-z2[]
-pndc <- function (url, to_file = FALSE, file = NA){
-  if (!to_file) {
-    system(paste0("pandoc -r html  ", url, " -t markdown")
-           , intern = TRUE, ignore.stderr = TRUE)
-  }
-  else {
-    if (is.na(file)) stop(message("file must not be NA"))
-    system(paste0("pandoc -r  html  ", url, " -o ", file)
-           , intern = TRUE, ignore.stderr = TRUE)
-  }
-}
-
-html_md <- function(urlvec){
-  if(length(urlvec)>1){
-    lapply(1:length(urlvec), function(x){
-      pndc(urlvec[x]
-           , to_file=TRUE
-           , file= file.path(path.expand("~/Desktop"),paste0("blogtest/new/test",x,".md") ) )
-    })
-  } else {
-    pndc(urlvec
-         , to_file=TRUE
-         , file= file.path(path.expand("~/Desktop"),paste0("blogtest/new/test.md") ) )
-
-  }
-}

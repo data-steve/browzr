@@ -1,21 +1,6 @@
 {
     "debugBreakpointsState" : {
         "breakpoints" : [
-            {
-                "editor_line_number" : 28,
-                "editor_state" : 2,
-                "function_name" : "url2Rmd",
-                "function_steps" : "",
-                "id" : 0,
-                "is_package_breakpoint" : false,
-                "is_pending_debug_completion" : false,
-                "line_number" : 28,
-                "needs_updated_steps" : true,
-                "package_name" : "",
-                "path" : "~/Documents/repos/github_packages/browzr/scripts/url2md.R",
-                "state" : 2,
-                "type" : 0
-            }
         ]
     }
 }
