@@ -1,0 +1,8 @@
+"0","# compose a thoughtful comment and save it to a variable"
+"0","my_comment <- ""I'd love a googleformr feature to help distinguish "
+"0","               between lots of posts for one person vs. "
+"0","               lots of posts from many people."""
+"0","# then send the comment"
+"0","googleformr::comments_gformr(my_comment)"
+"2","Thanks for supporting googleformr!
+"

@@ -1,0 +1,56 @@
+test if copyrighted "Copyright" or "©"
+
+if generator: blogger, then title: A workflow for publishing RStudio notebooks on Blogger
+
+if it starts with
+
+	<div
+	</div>
+	\
+	itemtype=
+
+
+if it ends with
+	grep("=|"\">\n"
+
+
+if it contains
+	<span|</span>
+
+
+span tags wrap around so need to concantonate lines with <span>...</span> and delete
+
+
+when you see pattern of 3 close div tags, the body-content is over
+</div>
+
+</div>
+
+</div>
+
+clues of end, "=breadcrumb", "=comments", "previous", "=footer", "=\"share", "=\"disqus",
+
+test  , blogger , <div class="breadcrumb">....<div id="comments" class="comments">
+test1 , jekyll (mine), [Previous](/links-i-liked/ "Links I liked")
+
+                        </div>
+
+                        <div class="footer-wrapper">
+test2 , wp, <div class="entry-links">
+test3 , jekyll, <div id="refs" class="references">
+
+                </div>
+
+                <div id="share-bar" class="social-container">
+test4 , jekyll, <div class="post-footer">
+test5, wp, <div class="entry-utility"> ......<div id="comments">
+test6, blogger, <div class="post-footer">
+test7, wp, <div class="sharedaddy sd-sharing-enabled">
+
+          <div
+          class="robots-nocontent sd-block sd-social sd-social-icon-text sd-sharing">
+
+          ### Share this: {.sd-title}
+test8, wp, <div id="nav-below" class="navigation">
+
+            <div class="nav-previous">

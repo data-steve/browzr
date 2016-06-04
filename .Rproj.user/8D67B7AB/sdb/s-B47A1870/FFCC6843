@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\npndc <- function (url, to_file = FALSE, file = NA)\n{\n  if (!to_file) {\n    system(paste0(\"pandoc -r html  \", url, \" -t markdown --wrap=preserve\"),\n           intern = TRUE, ignore.stderr = TRUE)\n  }\n  else {\n    if (is.na(file)) stop(message(\"file must not be NA\"))\n    system(paste0(\"pandoc -r  html  \", url, \" -o \", file),\n           intern = TRUE, ignore.stderr = TRUE)\n  }\n}\n\nhtml_md <- function(urlvec){\n  if(length(urlvec)>1){\n      lapply(1:length(urlvec), function(x){\n        pndc(urlvec[x]\n              , to_file=TRUE\n              , file= file.path(path.expand(\"~/Desktop\"),paste0(\"blogtest/new/test\",x,\".md\") ) )\n            })\n  } else {\n    pndc(urlvec\n         , to_file=TRUE\n         , file= file.path(path.expand(\"~/Desktop\"),paste0(\"blogtest/new/test.md\") ) )\n\n  }\n}\n\nvec_url <- \"http://data-steve.github.io/making-ggdumbbell-smarter/\"\nhtml_md(vec_url)\n\n# pndc(\"http://data-steve.github.io/making-ggdumbbell-smarter/\"\n#      , to_file=TRUE\n#      , file= file.path(path.expand(\"~/Desktop\"),paste0(\"blogtest/new/test1.md\") ) )\n#\n#\n#\n# vec_url <- c(\"http://data-steve.github.io/need-user-feedback-send-programmatically/\"\n#              , \"http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/\"\n#              , \"https://brendanrocks.com/htmlwidgets-knitr-jekyll/\"\n#              , \"http://www.bytemining.com/2016/02/its-been-a-while/\"\n#              , \"http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/\"\n#              , \"http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html\"\n#              , \"http://citizen-statistician.org/2016/02/02/how-do-readers-perceive-the-results-of-a-data-analysis/\"\n#              , \"http://civilstat.com/2016/04/after-5th-semester-of-statistics-phd-program/\")\n\n\n\n\n\n\n\n\n\n\n\n\nhome <- \"~/Desktop/blogtest\"\n\nxx <- lapply(grep(\"test\",dir(home), value = T), function(x) readLines(cl::go(home, x)))\n             'abc(\\n|.)*?efg'\ngrep(\"</div>(\\n|\\\"\\\"|.)*?</div>\",xx[[1]], perl = T )\nsystem(\"awk '/<\\/div>/,/<\\/div>/,/<\\/div>/!d' ~/Desktop/blogtest/test.md\")\nxx[[1]][!sapply(xx[[1]],function(x) grepl(\"<div|</div\",x), USE.NAMES = F)]\n\n\n\n\n\n# scraper for ending\nbody <- xx[[1]]\nhits <- rep(0, length(body))\nhits[grep(\"^\\\\s*</div>\\\\s*$\", body)] <- 1\nhits[grep(\"^\\\\s*$\", body)] <- 2\n\n\n# distinguish different blogging platforms\n# they likely have different conventions\n# for making start, stop, code chunks....\nfind_blogger <- function(x){\n  any(grep(\"generator: blogger\", x))\n}\n\nsapply(xx, find_blogger)\n\nfind_wordpress <- function(x){\n  any(grep(\"generator.*?wordpress\", x, ignore.case = T))\n}\n\nsapply(xx, find_wordpress)\n\nfind_other  <- function(x){\n  !any(grep(\"generator:\", x, ignore.case = T))\n}\n\nsapply(xx, find_other)\n\n\n\n# noticed that most use \"=footer\" to make end of content\nsapply(xx, function(x)  min(grep(\"footer\",x)) )\n\n\nsapply(xx, function(x) {\n  y<-min(grep(\"footer\",xx[[8]]), na.rm = T)\n  x[(y-20):(y+20)]\n  })\n\ngregexpr(\"12121\", paste(hits, collapse=\"\"))\n\nlocs <- lapply(gregexpr(\"12121\", paste(hits, collapse=\"\"))[[1]], function(x) x:c(x + 4))\n\n",
+    "created" : 1463664675792.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3998358273",
+    "id" : "FFCC6843",
+    "lastKnownWriteTime" : 1463360057,
+    "last_content_update" : 0,
+    "path" : "~/Documents/repos/github_packages/browzr/scripts/scraper.R",
+    "project_path" : "scripts/scraper.R",
+    "properties" : {
+        "chunk_rendered_width" : "650"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

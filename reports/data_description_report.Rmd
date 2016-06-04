@@ -1,0 +1,39 @@
+---
+title: "TITLE HERE"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: beamer_presentation
+---
+
+```{r, setup, echo=FALSE, results="hide", message=FALSE}
+# load packages
+if (!require("pacman")) install.packages("pacman"); library(pacman)
+p_load(cl, dplyr, magrittr, tidyr, readr, ggplot2)
+
+# set global options
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, fig.path='figures/')
+options(digit_digits = 1)
+cache <- TRUE
+panderOptions("digits", 1)
+
+# set home
+home <- cl::l_drive_go("swiper/PATH TO PROJECT HERE")
+
+# read in data
+dat <- readr::read_csv(cl::go(home, "data/PATH TO DATA HERE"))
+```
+
+# Question
+
+- What are you attempting to answer
+
+# Data: Overview
+
+- Describe the data (where did it come from; structure [nestedness, what rows/cols represent], n rows, n variables, missingness, etc.)
+
+# Data: Variables
+
+- Describe outcomes vs. predictors
+
+# Data: Descriptives
+
+- Distributions (viz[cross tabs, histogram, density, boxplots, etc.] + descriptions)

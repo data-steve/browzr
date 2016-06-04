@@ -1,0 +1,15 @@
+# Project Preamble
+
+# PROJECT NAME
+
+
+source('00_data_pull.R')
+# 1. Read  Data
+
+
+source('01_data_cleaning.R')
+# 2.  Clean Data
+
+
+source('02_anaysis.R')
+# 3.  ANALYSIS APPROACH 1 OVERVIEW
