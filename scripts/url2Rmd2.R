@@ -192,18 +192,6 @@ read_text <- function(url,flnm){
   file.edit(place)
 }
 
-test_for_div <- function(xx) {
-  nm <-html_name(xml2::xml_parent(xx))
-  if (nm=="div"){
-    TRUE
-  } else {
-    nm
-  }
-}
-# walk up the nested nodes looking for div-tags
-while (isTRUE(test_for_div(bdy))) {
-  bdy <- xml2::xml_parent(rvest::xml_nodes(bdy, test_for_div(bdy)))
-}
 
 test_for_ <- function(xx, f, tag){
   nm <-html_name(match.fun(f)(xx))
