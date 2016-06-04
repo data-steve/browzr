@@ -75,17 +75,32 @@ url2Rmd <- function(url) {
   # asc(xml_find_all(test,"//div/p"))
   # xml2::xml_parent()
 
-  classes <-c("entry-content", "post-content", "post", "post-bodycody")
+  classes <-c("entry-content", "post-content", "post", "post-bodycody", "pf-content")
   content_post <-names(which.max(sapply(classes,function(z) regexpr(z,asc(xx)))))
   bdy <- xml_find_first(xx,xpath=paste0(".//div[contains(@class, ",shQuote(content_post),")]"))
 
   if (length(bdy)==0){
     bdy <- xml_find_first(xx,xpath=".//article")
   }
-
- browser()
+xml_siblings("pre")
+ # browser()
   # find and clean code chunks
+  classes <-c("<pre>", "post-content", "post", "post-bodycody")
   if (grepl("<pre>", asc(bdy))){
+    pre_tags <- xml_nodes(bdy,xpath=".//pre")
+    if (!any(grepl("<p>",xml_siblings(pre_tags)))) {
+
+
+
+
+
+
+      go one step up
+
+
+
+
+    }
       v1 <- xml2::xml_text(bdy[grepl("<pre>", asc(bdy))])
       if (any(grepl("(\\d\n)+", v1))) {
         v1[grepl("(\\d+\n)+", v1)] <- gsub("^.+?(\\d+\n)+(\\s+|\n+)*", "", v1[grepl("(\\d+\n)+", v1)])
@@ -177,10 +192,55 @@ read_text <- function(url,flnm){
   file.edit(place)
 }
 
+test_for_div <- function(xx) {
+  nm <-html_name(xml2::xml_parent(xx))
+  if (nm=="div"){
+    TRUE
+  } else {
+    nm
+  }
+}
+# walk up the nested nodes looking for div-tags
+while (isTRUE(test_for_div(bdy))) {
+  bdy <- xml2::xml_parent(rvest::xml_nodes(bdy, test_for_div(bdy)))
+}
+
+test_for_ <- function(xx, f, tag){
+  nm <-html_name(match.fun(f)(xx))
+  if (nm==tag){
+    TRUE
+  } else {
+    nm[1]
+  }
+}
 
 
+walk_for_ <- function(xx, direction, tag){
+  f <- switch(direction,
+              "up" = "xml2::xml_parent",
+              "down" = "xml2::xml_children")
 
-
+  while (isTRUE(test_for_(xx,f,tag))) {
+    xx <- match.fun(f)(rvest::xml_nodes(xx, test_for_p(xx,f,tag)))
+  }
+  xx
+}
+# # walk up the nested nodes looking for p-tags
+#
+# test_for_p <- function(xx) {
+#   chld <- xml2::xml_children(bdy)
+#   nm <-html_name(chld)
+#   if (any(nm %in% "p")){
+#     TRUE
+#   } else {
+#     nm[1]
+#   }
+# }
+#
+# # walk down the nested nodes looking for p-tags
+# while (isTRUE(test_for_p(bdy))) {
+#   bdy <- xml2::xml_children(rvest::xml_nodes(bdy, test_for_p(bdy)))
+# }
 
 
 load_checker <- function(md){
