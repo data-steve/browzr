@@ -82,33 +82,35 @@ url2Rmd <- function(url) {
   if (length(bdy)==0){
     bdy <- xml_find_first(xx,xpath=".//article")
   }
-xml_siblings("pre")
+
  # browser()
   # find and clean code chunks
-  classes <-c("<pre>", "post-content", "post", "post-bodycody")
-  if (grepl("<pre>", asc(bdy))){
-    pre_tags <- xml_nodes(bdy,xpath=".//pre")
+  # classes <-c("<pre>", "post-content", "post", "post-bodycody")
+  # grepl("<pre>", asc(bdy)) ".//pre"
+  # grepl("crayon-pre", asc(bdy)) ".//div[contains(@class, 'crayon-pre')]"
+  # grepl("td class=\"code", asc(bdy))
+  # xml_text(xml_nodes(bdy,xpath=".//pre"))
+  # if (grepl("<pre>", asc(bdy))){
+  pre_tags <- xml_nodes(bdy,xpath=".//pre")
+  if (length(pre_tags)!=0){
     if (!any(grepl("<p>",xml_siblings(pre_tags)))) {
+      pre_tag_content <- pre_tags
+      pre_tag_container <- pre_tags
 
 
-
-
-
-
-      go one step up
-
-
+      pre_tag_container <- walk_for_(pre_tag_container,"up","p")
+      xml2::xml_replace(pre_tag_container,pre_tags)
 
 
     }
-      v1 <- xml2::xml_text(bdy[grepl("<pre>", asc(bdy))])
-      if (any(grepl("(\\d\n)+", v1))) {
-        v1[grepl("(\\d+\n)+", v1)] <- gsub("^.+?(\\d+\n)+(\\s+|\n+)*", "", v1[grepl("(\\d+\n)+", v1)])
-      }
-      # xml2::(v1)
-      # xml2::read_xml(asc(lapply(v1, htmltools::code)[[1]]))
-      # body[grepl("<pre>", asc(body))]  <- )
+
+    # my need to change for gutter numbers
+    # v1 <- xml2::xml_text(bdy[grepl("<pre>", asc(bdy))])
+    # if (any(grepl("(\\d\n)+", v1))) {
+    #   v1[grepl("(\\d+\n)+", v1)] <- gsub("^.+?(\\d+\n)+(\\s+|\n+)*", "", v1[grepl("(\\d+\n)+", v1)])
+    # }
   }
+
 
   # check for and get gists
   gist_urls <- check_for_gist(bdy)
@@ -205,8 +207,8 @@ test_for_ <- function(xx, f, tag){
 
 walk_for_ <- function(xx, direction, tag){
   f <- switch(direction,
-              "up" = "xml2::xml_parent",
-              "down" = "xml2::xml_children")
+              "up" = "xml_parent",
+              "down" = "xml_children")
 
   while (isTRUE(test_for_(xx,f,tag))) {
     xx <- match.fun(f)(rvest::xml_nodes(xx, test_for_p(xx,f,tag)))
