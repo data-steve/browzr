@@ -83,7 +83,7 @@ url2Rmd <- function(url) {
     bdy <- xml_find_first(xx,xpath=".//article")
   }
 
- # browser()
+ browser()
   # find and clean code chunks
   # classes <-c("<pre>", "post-content", "post", "post-bodycody")
   # grepl("<pre>", asc(bdy)) ".//pre"
