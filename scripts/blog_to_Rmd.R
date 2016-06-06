@@ -1,7 +1,16 @@
 url2Rmd <- function(url) {
-  xx    <- xml2::read_html(vec_url[2], encoding = "UTF-8")
-  title <- xml2::xml_text(rvest::xml_nodes(xx,"title"))
+
+  xx    <- xml2::read_html(xx, encoding = "UTF-8") #"http://r-norberg.blogspot.com/2016/06/understanding-datatable-rolling-joins.html")
   generator <- get_generator(xx)
+
+  if (generator =="blogger") {
+    xx <- xml2::read_html(
+      RSelenium_get_blogger("http://r-norberg.blogspot.com/2016/06/understanding-datatable-rolling-joins.html")
+      , encoding = "UTF-8")
+  }
+    vec_url[2], encoding = "UTF-8")
+  title <- xml2::xml_text(rvest::xml_nodes(xx,"title"))
+
   # xml2::xml_attr(rvest::xml_nodes(xx,"meta"), "generator")
   # test <- rvest::xml_nodes(xx,"body")
 
@@ -9,7 +18,7 @@ url2Rmd <- function(url) {
   # asc(xml_find_all(test,"//div/p"))
   # xml2::xml_parent()
 
-  classes <-c("entry-content", "post-content", "post", "post-bodycody", "pf-content", "entry")
+  classes <-c("entry-content", "post-content", "post", "post-bodycody", "pf-content", "entry", "hfeed", "article")
   content_post <-names(which.max(sapply(classes,function(z) regexpr(z,asc(xx)))))
   bdy <- xml2::xml_find_first(xx,xpath=paste0(".//div[contains(@class, ",shQuote(content_post),")]"))
   # browser()
@@ -23,27 +32,33 @@ url2Rmd <- function(url) {
   # find and clean code chunks
   # classes <-c("<pre>", "post-content", "post", "post-bodycody")
   # grepl("<pre>", asc(bdy)) ".//pre"
+  # .//crayon-plain-wrap
   # grepl("crayon-pre", asc(bdy)) ".//div[contains(@class, 'crayon-pre')]"
   # grepl("td class=\"code", asc(bdy))
   # xml_text(xml_nodes(bdy,xpath=".//pre"))
-  # if (grepl("<pre>", asc(bdy))){
-  pre_tags <- rvest::xml_nodes(bdy,xpath=".//div[contains(@class, 'crayon-pre')]")
+  # if (grepl("<pre>", asc(bdy))){  paste0(".//div[contains(@class, ",shQuote(content_post),")]")
+  codeclasses <- c('crayon-plain-wrap','crayon-plain-tag','<pre')
+  codeclass <-  codeclasses[sapply(codeclasses,function(z) regexpr(z,asc(xx)))>-1][1]
+  codepath <-c(".//.[contains(@class, 'crayon-plain-wrap')]",".//.[contains(@class, 'crayon-plain-tag')]", ".//pre")
+  pre_tags <- xml2::xml_find_all(bdy,xpath=codepath[grep(gsub("<","",codeclass), codepath)] )
+  pre_tags <- rvest::xml_nodes(bdy,xpath=".//pre")
   if (length(pre_tags)!=0){
     if (!any(grepl("<p>",xml2::xml_parent(pre_tags)))) {
       pre_tag_content <- pre_tags
       pre_tag_container <- pre_tags
 
       pre <- lapply(pre_tag_content, function(z) {paste0(
-        htmltools::div(
+        # htmltools::div(
           htmltools::pre(class="r"
                          , htmltools::code(
                            sQuote(paste(xml_text(z),collapse="\n")))
-          ))
+          ) #)
         )})
 
-      pre <-  xml2::read_xml(asc(paste(c("<div>",pre, "</div>"), collapse="")))
+      pre_tag_content <-  xml2::read_xml(paste(c("<div>",pre , "</div>"), collapse=""))
+      pre_tag_content <- rvest::xml_nodes(pre_tag_content,"pre")
       pre_tag_container <- walk_for_(pre_tag_container,"up","p")
-      xml2::xml_replace(pre_tag_container,pre)
+      xml2::xml_replace(pre_tag_container,pre_tag_content)
 
 
     }

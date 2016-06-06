@@ -17,11 +17,17 @@ vec_url <- c("http://data-steve.github.io/need-user-feedback-send-programmatical
              , "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/" # wp-plugin
              , "https://brendanrocks.com/htmlwidgets-knitr-jekyll/"    # jekyll, various code types and embedded svg
              , "http://www.bytemining.com/2016/02/its-been-a-while/"  # no code example
-             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/" # gist embedded
-             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html" # blogger
-             , "http://citizen-statistician.org/2016/02/02/how-do-readers-perceive-the-results-of-a-data-analysis/"
-             , "http://civilstat.com/2016/04/after-5th-semester-of-statistics-phd-program/")
+             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/" #
+             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html" # blogger gist embedded
+             , "http://www.r-bloggers.com/what-are-the-best-machine-learning-packages-in-r/"
+             , "http://moderndata.plot.ly/trisurf-plots-in-r-using-plotly/" # crazy indented crayon tables
+             , "http://www.r-statistics.com/2016/05/heatmaply-interactive-heat-maps/" # wp_codebox td.code pre
+             , "http://r-norberg.blogspot.com/2016/06/understanding-datatable-rolling-joins.html" # bloggers, pre class , no p tags only div
+             , "http://joelcadwell.blogspot.com/2016/06/building-data-matrix-for-task-at-hand.html" # blogger, no p tag, just open text
+)
 
+
+if blogger, pre can be inserted at <br> level since there is no p tags
 
 
 
@@ -168,7 +174,7 @@ get_generator <- function(xx){
 
 test_for_ <- function(xx, f, tag){
   nm <-html_name(match.fun(f)(xx))
-  if (nm==tag){
+  if (any(tag %in% nm)){
     TRUE
   } else {
     nm[1]
