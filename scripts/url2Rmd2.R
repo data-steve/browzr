@@ -13,12 +13,12 @@ test_for_div <- function(tree) {
   }
 }
 
-vec_url <- c("http://data-steve.github.io/need-user-feedback-send-programmatically/"
-             , "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/"
-             , "https://brendanrocks.com/htmlwidgets-knitr-jekyll/"
-             , "http://www.bytemining.com/2016/02/its-been-a-while/"
-             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/"
-             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html"
+vec_url <- c("http://data-steve.github.io/need-user-feedback-send-programmatically/"  # basic jekyll
+             , "http://www.beardedanalytics.com/correctly-reporting-p-values-in-summary-tables-reported-with-xtable/" # wp-plugin
+             , "https://brendanrocks.com/htmlwidgets-knitr-jekyll/"    # jekyll, various code types and embedded svg
+             , "http://www.bytemining.com/2016/02/its-been-a-while/"  # no code example
+             , "http://chrisladroue.com/2014/11/another-take-on-building-a-multi-lingual-shiny-app/" # gist embedded
+             , "http://christophergandrud.blogspot.com/2015/05/a-link-between-topicmodels-lda-and.html" # blogger
              , "http://citizen-statistician.org/2016/02/02/how-do-readers-perceive-the-results-of-a-data-analysis/"
              , "http://civilstat.com/2016/04/after-5th-semester-of-statistics-phd-program/")
 
@@ -165,6 +165,30 @@ get_generator <- function(xx){
   }
 }
 
+
+test_for_ <- function(xx, f, tag){
+  nm <-html_name(match.fun(f)(xx))
+  if (nm==tag){
+    TRUE
+  } else {
+    nm[1]
+  }
+}
+
+
+walk_for_ <- function(xx, direction, tag){
+  f <- switch(direction,
+              "up" = "xml_parent",
+              "down" = "xml_children")
+
+  while (isTRUE(test_for_(xx,f,tag))) {
+    xx <- match.fun(f)(rvest::xml_nodes(xx, test_for_p(xx,f,tag)))
+  }
+  xx
+}
+
+
+
 get_code <- function(xx){
   browser()
   ll <- xml2::xml_contents(xx)
@@ -195,26 +219,6 @@ read_text <- function(url,flnm){
 }
 
 
-test_for_ <- function(xx, f, tag){
-  nm <-html_name(match.fun(f)(xx))
-  if (nm==tag){
-    TRUE
-  } else {
-    nm[1]
-  }
-}
-
-
-walk_for_ <- function(xx, direction, tag){
-  f <- switch(direction,
-              "up" = "xml_parent",
-              "down" = "xml_children")
-
-  while (isTRUE(test_for_(xx,f,tag))) {
-    xx <- match.fun(f)(rvest::xml_nodes(xx, test_for_p(xx,f,tag)))
-  }
-  xx
-}
 # # walk up the nested nodes looking for p-tags
 #
 # test_for_p <- function(xx) {
