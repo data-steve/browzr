@@ -4,10 +4,11 @@ url2Rmd <- function(url) {
   generator <- get_generator(xx)
 
   if (generator =="blogger") {
-    xx <- invisible(RSelenium_get_blogger("http://r-norberg.blogspot.com/2016/06/understanding-datatable-rolling-joins.html"))
-    xx <- xml2::read_html(xx, encoding = "UTF-8")
+    x <- invisible(RSelenium_get_blogger("http://r-norberg.blogspot.com/2016/06/understanding-datatable-rolling-joins.html"))
+
+    xx <- xml2::read_html(x, encoding = "UTF-8")
   }
-    vec_url[2], encoding = "UTF-8")
+
   title <- xml2::xml_text(rvest::xml_nodes(xx,"title"))
 
   # xml2::xml_attr(rvest::xml_nodes(xx,"meta"), "generator")
@@ -50,14 +51,14 @@ url2Rmd <- function(url) {
     pre <- lapply(pre_tag_content, function(z) {paste0(
         htmltools::pre(class="r"
                        , htmltools::code(
-                         sQuote(
+                         # sQuote(
                            paste(xml_text(z),collapse="\n")
-                         )
+                         # )
         ) )
       )})
 
-    pre_tag_content <-  xml2::read_xml(paste(c("<div>",pre , "</div>"), collapse=""))
-    pre_tag_content <- rvest::xml_nodes(pre_tag_content,"pre")
+    pre_tag_content <-  xml2::xml_find_all(xml2::read_xml(paste(c("<div>",pre , "</div>"), collapse="")),"pre")
+
     if (!any(grepl("<p>|<div",xml2::xml_parent(pre_tags)))) {
       pre_tag_container <- walk_for_(pre_tag_container,"up","p|div")
     }
@@ -102,11 +103,11 @@ url2Rmd <- function(url) {
 # md <- system(sprintf("echo '%s' | pandoc -r html  -t markdown", gsub("</html>", "<body><div>hi</div></body></html>",rvest::minimal_html("testing")))
 #              , intern = TRUE, ignore.stderr = TRUE)
 
-  cmd <-sprintf("echo '%s' | pandoc -r html  -t markdown", asc(bdy))
+  cmd <-sprintf("echo %s | pandoc -r html  -t markdown", shQuote(asc(bdy)))
   md <- system(cmd , intern = TRUE, ignore.stderr = TRUE)
 
-  hotbod <- gsub("```[ ]{0,1}\\{.*?\\}","```\\{r\\}",md[!grepl("<div|</div>|^\\\\",md)])
-  hotbod <- gsub("\"</code>|\'</code>|’</code>|’’</code>", "</code>", gsub("<code>\"|<code>\'|<code>‘<code>‘‘","<code>", hotbod))
+  hotbod <- gsub("```[ ]{0,1}\\{.*?\\}","```\\{r\\}",md[!grepl("<div|</div>|^\\\\|^\"$|^style=",md)])
+  # hotbod <- gsub("\"</code>|\'</code>|’</code>|’’</code>", "</code>", gsub("<code>\"|<code>\'|<code>‘<code>‘‘","<code>", hotbod))
 
   yml <- paste('---'
                , 'title: "R Notebook"'
